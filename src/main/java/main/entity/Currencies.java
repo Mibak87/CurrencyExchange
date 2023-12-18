@@ -6,12 +6,6 @@ public class Currencies {
     private String fullName;
     private String sign;
 
-    public Currencies(int id, String code, String fullName, String sign) {
-        this.id = id;
-        this.code = code;
-        this.fullName = fullName;
-        this.sign = sign;
-    }
 
     public int getId() {
         return id;
@@ -43,5 +37,15 @@ public class Currencies {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    @Override
+    public String toString() {
+        return "Currencies{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", sign='" + sign + '\'' +
+                '}';
     }
 }
