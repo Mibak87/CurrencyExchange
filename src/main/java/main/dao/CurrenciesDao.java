@@ -48,8 +48,18 @@ public class CurrenciesDao implements Dao<Currencies> {
     }
 
     @Override
-    public void update(Currencies currencies, String[] params) {
-
+    public void update(Currencies currencies) {
+        String sqlQuery = "UPDATE Currencies SET Code = ?, FullName = ?, Sign = ? WHERE ID = ?";
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:CurrencyExchange.sqlite")) {
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            statement.setString(1, currencies.getCode());
+            statement.setString(2, currencies.getFullName());
+            statement.setString(3, currencies.getSign());
+            statement.setInt(4,currencies.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

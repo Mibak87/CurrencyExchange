@@ -37,12 +37,31 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
 
     @Override
     public void save(ExchangeRates exchangeRates) {
-
+        String sqlQuery = "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:CurrencyExchange.sqlite")) {
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            statement.setInt(1, exchangeRates.getBaseCurrencyId());
+            statement.setInt(2, exchangeRates.getTargetCurrencyId());
+            statement.setDouble(3, exchangeRates.getRate());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void update(ExchangeRates exchangeRates, String[] params) {
-
+    public void update(ExchangeRates exchangeRates) {
+        String sqlQuery = "UPDATE ExchangeRates SET BaseCurrencyId = ?, TargetCurrencyId = ?, Rate = ? WHERE ID = ?";
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:CurrencyExchange.sqlite")) {
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            statement.setInt(1, exchangeRates.getBaseCurrencyId());
+            statement.setInt(2, exchangeRates.getTargetCurrencyId());
+            statement.setDouble(3, exchangeRates.getRate());
+            statement.setInt(4,exchangeRates.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
