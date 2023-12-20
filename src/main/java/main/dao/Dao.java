@@ -1,5 +1,6 @@
 package main.dao;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface Dao<T> {
@@ -7,5 +8,4 @@ public interface Dao<T> {
     void save(T t);
     void update(T t);
     T getById(int id);
-
 }

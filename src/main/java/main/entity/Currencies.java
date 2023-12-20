@@ -1,5 +1,8 @@
 package main.entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+@JsonAutoDetect
 public class Currencies {
     private int id;
     private String code;

@@ -2,13 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSP - Hello World</title>
+    <title>Currency Exchange</title>
 </head>
 <body>
-<h1><%= "Hello World!" %>
+<h1><%= "Currency Exchange" %>
 </h1>
 <br/>
-<a href="currencyexchange">Currency Exchange</a>
-<a href="currencies">Список валют</a>
+<p><a href="currencies">Список валют</a></p>
 </body>
 </html>
