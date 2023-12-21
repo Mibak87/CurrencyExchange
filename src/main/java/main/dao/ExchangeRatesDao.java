@@ -14,7 +14,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     public List<ExchangeRates> getAll() {
         String sqlQuery = "SELECT * FROM ExchangeRates";
         List<ExchangeRates> listExchangeRates = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -38,7 +38,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     @Override
     public void save(ExchangeRates exchangeRates) {
         String sqlQuery = "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setInt(1, exchangeRates.getBaseCurrencyId());
             statement.setInt(2, exchangeRates.getTargetCurrencyId());
@@ -52,7 +52,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     @Override
     public void update(ExchangeRates exchangeRates) {
         String sqlQuery = "UPDATE ExchangeRates SET BaseCurrencyId = ?, TargetCurrencyId = ?, Rate = ? WHERE ID = ?";
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setInt(1, exchangeRates.getBaseCurrencyId());
             statement.setInt(2, exchangeRates.getTargetCurrencyId());
@@ -68,7 +68,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     public ExchangeRates getById(int id) {
         String sqlQuery = "SELECT * FROM ExchangeRates WHERE ID=?";
         ExchangeRates exchangeRates = new ExchangeRates();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();

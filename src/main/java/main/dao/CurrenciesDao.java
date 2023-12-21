@@ -2,6 +2,8 @@ package main.dao;
 
 import main.entity.Currencies;
 
+import java.io.File;
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     public List<Currencies> getAll() {
         String sqlQuery = "SELECT * FROM Currencies";
         List<Currencies> listCurrencies = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -36,7 +38,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     @Override
     public void save(Currencies currencies) {
         String sqlQuery = "INSERT INTO Currencies (Code, FullName, Sign) VALUES (?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setString(1, currencies.getCode());
             statement.setString(2, currencies.getFullName());
@@ -50,7 +52,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     @Override
     public void update(Currencies currencies) {
         String sqlQuery = "UPDATE Currencies SET Code = ?, FullName = ?, Sign = ? WHERE ID = ?";
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setString(1, currencies.getCode());
             statement.setString(2, currencies.getFullName());
@@ -66,7 +68,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     public Currencies getById(int id) {
         String sqlQuery = "SELECT * FROM Currencies WHERE ID=?";
         Currencies currencies = new Currencies();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -90,7 +92,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     public Currencies getByCode(String code) {
         String sqlQuery = "SELECT * FROM Currencies WHERE Code=?";
         Currencies currencies = new Currencies();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\java\\main\\database\\CurrencyExchange.sqlite")) {
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setString(1, code);
             ResultSet resultSet = statement.executeQuery();

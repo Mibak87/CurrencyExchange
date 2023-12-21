@@ -18,12 +18,10 @@ public class CurrenciesServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper();
         PrintWriter print = response.getWriter();
 
-        //List<Currencies> currencies = new CurrenciesDao().getAll();
-        Currencies currencies = new CurrenciesDao().getById(1);
-        print.println(currencies);
-        //objectMapper.writeValue(print,currencies);
+        List<Currencies> currencies = new CurrenciesDao().getAll();
+        objectMapper.writeValue(print,currencies);
         //System.out.println(print);
-        //printWriter.println(objectMapper.writeValueAsString(currencies));
+        print.println(objectMapper.writeValueAsString(currencies));
 
     }
 
