@@ -9,5 +9,7 @@
 </h1>
 <br/>
 <p><a href="currencies">Список валют</a></p>
+<p><a href="currency/">Получение конкретной валюты</a></p>
+<p><a href="exchangerates">Список обменных курсов</a></p>
 </body>
 </html>

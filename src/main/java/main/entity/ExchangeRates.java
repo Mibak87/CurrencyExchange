@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 public class ExchangeRates {
     private int id;
-    private int baseCurrencyId;
-    private int targetCurrencyId;
+    private Currencies baseCurrencyId;
+    private Currencies targetCurrencyId;
     private double rate;
 
 
@@ -17,19 +17,19 @@ public class ExchangeRates {
         this.id = id;
     }
 
-    public int getBaseCurrencyId() {
+    public Currencies getBaseCurrencyId() {
         return baseCurrencyId;
     }
 
-    public void setBaseCurrencyId(int baseCurrencyId) {
+    public void setBaseCurrencyId(Currencies baseCurrencyId) {
         this.baseCurrencyId = baseCurrencyId;
     }
 
-    public int getTargetCurrencyId() {
+    public Currencies getTargetCurrencyId() {
         return targetCurrencyId;
     }
 
-    public void setTargetCurrencyId(int targetCurrencyId) {
+    public void setTargetCurrencyId(Currencies targetCurrencyId) {
         this.targetCurrencyId = targetCurrencyId;
     }
 

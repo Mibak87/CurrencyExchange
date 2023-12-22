@@ -20,9 +20,7 @@ public class CurrenciesServlet extends HttpServlet {
 
         List<Currencies> currencies = new CurrenciesDao().getAll();
         objectMapper.writeValue(print,currencies);
-        //System.out.println(print);
-        print.println(objectMapper.writeValueAsString(currencies));
-
+        System.out.println(print);
     }
 
     @Override

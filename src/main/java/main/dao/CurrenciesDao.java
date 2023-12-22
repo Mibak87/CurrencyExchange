@@ -2,8 +2,6 @@ package main.dao;
 
 import main.entity.Currencies;
 
-import java.io.File;
-import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

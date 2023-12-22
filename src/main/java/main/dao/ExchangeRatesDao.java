@@ -21,9 +21,9 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                 ExchangeRates exchangeRates = new ExchangeRates();
                 int exchangeId = resultSet.getInt("ID");
                 exchangeRates.setId(exchangeId);
-                int exchangeBaseId = resultSet.getInt("BaseCurrencyId");
+                Currencies exchangeBaseId = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
                 exchangeRates.setBaseCurrencyId(exchangeBaseId);
-                int exchangeTaggetId = resultSet.getInt("TargetCurrencyId");
+                Currencies exchangeTaggetId = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
                 exchangeRates.setTargetCurrencyId(exchangeTaggetId);
                 double exchangeRate = resultSet.getDouble("Rate");
                 exchangeRates.setRate(exchangeRate);
@@ -40,8 +40,8 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         String sqlQuery = "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (?, ?, ?)";
         try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setInt(1, exchangeRates.getBaseCurrencyId());
-            statement.setInt(2, exchangeRates.getTargetCurrencyId());
+            statement.setInt(1, exchangeRates.getBaseCurrencyId().getId());
+            statement.setInt(2, exchangeRates.getTargetCurrencyId().getId());
             statement.setDouble(3, exchangeRates.getRate());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -54,8 +54,8 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         String sqlQuery = "UPDATE ExchangeRates SET BaseCurrencyId = ?, TargetCurrencyId = ?, Rate = ? WHERE ID = ?";
         try (Connection connection = ConnectionDataBase.connectionDB()) {
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setInt(1, exchangeRates.getBaseCurrencyId());
-            statement.setInt(2, exchangeRates.getTargetCurrencyId());
+            statement.setInt(1, exchangeRates.getBaseCurrencyId().getId());
+            statement.setInt(2, exchangeRates.getTargetCurrencyId().getId());
             statement.setDouble(3, exchangeRates.getRate());
             statement.setInt(4,exchangeRates.getId());
             statement.executeUpdate();
@@ -75,9 +75,9 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             while (resultSet.next()) {
                 int exchangeId = resultSet.getInt("ID");
                 exchangeRates.setId(exchangeId);
-                int exchangeBaseId = resultSet.getInt("BaseCurrencyId");
+                Currencies exchangeBaseId = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
                 exchangeRates.setBaseCurrencyId(exchangeBaseId);
-                int exchangeTaggetId = resultSet.getInt("TargetCurrencyId");
+                Currencies exchangeTaggetId = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
                 exchangeRates.setTargetCurrencyId(exchangeTaggetId);
                 double exchangeRate = resultSet.getDouble("Rate");
                 exchangeRates.setRate(exchangeRate);
