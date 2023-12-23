@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExchangeRatesDao implements Dao<ExchangeRates> {
-    private List<ExchangeRates> exchangeRates;
 
     @Override
     public List<ExchangeRates> getAll() {
@@ -78,6 +77,34 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                 Currencies exchangeBaseId = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
                 exchangeRates.setBaseCurrencyId(exchangeBaseId);
                 Currencies exchangeTaggetId = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
+                exchangeRates.setTargetCurrencyId(exchangeTaggetId);
+                double exchangeRate = resultSet.getDouble("Rate");
+                exchangeRates.setRate(exchangeRate);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return exchangeRates;
+    }
+
+    public ExchangeRates getByCode(String code) {
+        String baseCode = code.substring(0,3);
+        String targetCode = code.substring(3);
+        int baseId = new CurrenciesDao().getByCode(baseCode).getId();
+        int targetId = new CurrenciesDao().getByCode(targetCode).getId();
+        String sqlQuery = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId=? AND TargetCurrencyId=?";
+        ExchangeRates exchangeRates = new ExchangeRates();
+        try (Connection connection = ConnectionDataBase.connectionDB()) {
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            statement.setInt(1, baseId);
+            statement.setInt(2, targetId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int exchangeId = resultSet.getInt("ID");
+                exchangeRates.setId(exchangeId);
+                Currencies exchangeBaseId = new CurrenciesDao().getById(baseId);
+                exchangeRates.setBaseCurrencyId(exchangeBaseId);
+                Currencies exchangeTaggetId = new CurrenciesDao().getById(targetId);
                 exchangeRates.setTargetCurrencyId(exchangeTaggetId);
                 double exchangeRate = resultSet.getDouble("Rate");
                 exchangeRates.setRate(exchangeRate);
