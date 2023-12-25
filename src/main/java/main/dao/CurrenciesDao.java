@@ -31,78 +31,65 @@ public class CurrenciesDao implements Dao<Currencies> {
     }
 
     @Override
-    public void save(Currencies currencies) {
+    public void save(Currencies currencies) throws SQLException {
         String sqlQuery = "INSERT INTO Currencies (Code, FullName, Sign) VALUES (?, ?, ?)";
-        try (Connection connection = ConnectionDataBase.connectionDB()) {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setString(1, currencies.getCode());
-            statement.setString(2, currencies.getFullName());
-            statement.setString(3, currencies.getSign());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Connection connection = ConnectionDataBase.connectionDB();
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        statement.setString(1, currencies.getCode());
+        statement.setString(2, currencies.getFullName());
+        statement.setString(3, currencies.getSign());
+        statement.executeUpdate();
     }
 
     @Override
-    public void update(Currencies currencies) {
+    public void update(Currencies currencies) throws SQLException {
         String sqlQuery = "UPDATE Currencies SET Code = ?, FullName = ?, Sign = ? WHERE ID = ?";
-        try (Connection connection = ConnectionDataBase.connectionDB()) {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setString(1, currencies.getCode());
-            statement.setString(2, currencies.getFullName());
-            statement.setString(3, currencies.getSign());
-            statement.setInt(4,currencies.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Connection connection = ConnectionDataBase.connectionDB();
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        statement.setString(1, currencies.getCode());
+        statement.setString(2, currencies.getFullName());
+        statement.setString(3, currencies.getSign());
+        statement.setInt(4,currencies.getId());
+        statement.executeUpdate();
     }
 
     @Override
-    public Currencies getById(int id) {
+    public Currencies getById(int id) throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies WHERE ID=?";
         Currencies currencies = new Currencies();
-        try (Connection connection = ConnectionDataBase.connectionDB()) {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                int currenciesId = resultSet.getInt("ID");
-                currencies.setId(currenciesId);
-                String currenciesCode = resultSet.getString("Code");
-                currencies.setCode(currenciesCode);
-                String currenciesFullName = resultSet.getString("FullName");
-                currencies.setFullName(currenciesFullName);
-                String currenciesSign = resultSet.getString("Sign");
-                currencies.setSign(currenciesSign);
-            }
-        } catch (SQLException e) {
-            System.out.println("Ошибка подключения к базе данных.");
-            e.printStackTrace();
+        Connection connection = ConnectionDataBase.connectionDB();
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        statement.setInt(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            int currenciesId = resultSet.getInt("ID");
+            currencies.setId(currenciesId);
+            String currenciesCode = resultSet.getString("Code");
+            currencies.setCode(currenciesCode);
+            String currenciesFullName = resultSet.getString("FullName");
+            currencies.setFullName(currenciesFullName);
+            String currenciesSign = resultSet.getString("Sign");
+            currencies.setSign(currenciesSign);
         }
         return currencies;
     }
 
-    public Currencies getByCode(String code) {
+    public Currencies getByCode(String code) throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies WHERE Code=?";
         Currencies currencies = new Currencies();
-        try (Connection connection = ConnectionDataBase.connectionDB()) {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setString(1, code);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                int currenciesId = resultSet.getInt("ID");
-                currencies.setId(currenciesId);
-                String currenciesCode = resultSet.getString("Code");
-                currencies.setCode(currenciesCode);
-                String currenciesFullName = resultSet.getString("FullName");
-                currencies.setFullName(currenciesFullName);
-                String currenciesSign = resultSet.getString("Sign");
-                currencies.setSign(currenciesSign);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        Connection connection = ConnectionDataBase.connectionDB();
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        statement.setString(1, code);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            int currenciesId = resultSet.getInt("ID");
+            currencies.setId(currenciesId);
+            String currenciesCode = resultSet.getString("Code");
+            currencies.setCode(currenciesCode);
+            String currenciesFullName = resultSet.getString("FullName");
+            currencies.setFullName(currenciesFullName);
+            String currenciesSign = resultSet.getString("Sign");
+            currencies.setSign(currenciesSign);
         }
         return currencies;
     }

@@ -22,6 +22,7 @@ public class CurrenciesServlet extends HttpServlet {
             List<Currencies> currencies = new CurrenciesDao().getAll();
             objectMapper.writeValue(print, currencies);
             System.out.println(print);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
@@ -30,19 +31,25 @@ public class CurrenciesServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String name = request.getParameter("name");
-        String code = request.getParameter("code");
-        String sign = request.getParameter("sign");
-        Currencies currencies = new Currencies();
-        currencies.setFullName(name);
-        currencies.setCode(code);
-        currencies.setSign(sign);
-        new CurrenciesDao().save(currencies);
+        try {
+            String name = request.getParameter("name");
+            String code = request.getParameter("code");
+            String sign = request.getParameter("sign");
+            Currencies currencies = new Currencies();
+            currencies.setFullName(name);
+            currencies.setCode(code);
+            currencies.setSign(sign);
+            new CurrenciesDao().save(currencies);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        PrintWriter print = response.getWriter();
-        Currencies responseCurrencies = new CurrenciesDao().getByCode(code);
-        objectMapper.writeValue(print,currencies);
-        System.out.println(print);
+            ObjectMapper objectMapper = new ObjectMapper();
+            PrintWriter print = response.getWriter();
+            Currencies responseCurrencies = new CurrenciesDao().getByCode(code);
+            objectMapper.writeValue(print, responseCurrencies);
+            System.out.println(print);
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+        }
     }
 }

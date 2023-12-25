@@ -8,6 +8,7 @@ import main.dao.ExchangeRatesDao;
 import main.entity.ExchangeRates;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 @WebServlet(name = "ExchangeRateServlet", value = "/exchangerate/*")
 public class ExchangeRateServlet extends HttpServlet {
@@ -15,11 +16,25 @@ public class ExchangeRateServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String exchangeCode = request.getPathInfo().substring(1);
         if (!exchangeCode.isEmpty()) {
-            ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
-            objectMapper.writeValue(print, exchangeRates);
-            System.out.println(print);
+            try {
+                ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
+                if (exchangeRates != null) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    PrintWriter print = response.getWriter();
+                    objectMapper.writeValue(print, exchangeRates);
+                    System.out.println(print);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND,"The exchange rate for the currencies was not found.");
+                }
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The currency codes is missing from the address.");
         }
     }
 
@@ -36,17 +51,23 @@ public class ExchangeRateServlet extends HttpServlet {
     protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String exchangeCode = request.getPathInfo().substring(1);
         if (!exchangeCode.isEmpty()) {
-            ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
-            String rateString = request.getParameter("rate");
-            double rate = Double.parseDouble(rateString);
-            exchangeRates.setRate(rate);
-            new ExchangeRatesDao().update(exchangeRates);
+            try {
+                ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
+                String rateString = request.getParameter("rate");
+                double rate = Double.parseDouble(rateString);
+                exchangeRates.setRate(rate);
+                new ExchangeRatesDao().update(exchangeRates);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
-            ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
-            objectMapper.writeValue(print,responseExchange);
-            System.out.println(print);
+                ObjectMapper objectMapper = new ObjectMapper();
+                PrintWriter print = response.getWriter();
+                ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
+                objectMapper.writeValue(print, responseExchange);
+                System.out.println(print);
+                response.setStatus(HttpServletResponse.SC_OK);
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+            }
         }
     }
 

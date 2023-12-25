@@ -9,6 +9,7 @@ import main.entity.Currencies;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 @WebServlet(name = "CurrencyServlet", value = "/currency/*")
 public class CurrencyServlet extends HttpServlet {
@@ -16,11 +17,25 @@ public class CurrencyServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String currencyCode = request.getPathInfo().substring(1);
         if (!currencyCode.isEmpty()) {
-            Currencies currencies = new CurrenciesDao().getByCode(currencyCode);
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
-            objectMapper.writeValue(print, currencies);
-            System.out.println(print);
+            try {
+                Currencies currencies = new CurrenciesDao().getByCode(currencyCode);
+                if (currencies != null) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    PrintWriter print = response.getWriter();
+                    objectMapper.writeValue(print, currencies);
+                    System.out.println(print);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND,"The currency was not found.");
+                }
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The currency code is missing from the address.");
         }
     }
 
