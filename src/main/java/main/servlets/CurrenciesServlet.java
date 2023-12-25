@@ -9,17 +9,23 @@ import main.entity.Currencies;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(name = "Currencies", value = "/currencies")
 public class CurrenciesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        PrintWriter print = response.getWriter();
-        List<Currencies> currencies = new CurrenciesDao().getAll();
-        objectMapper.writeValue(print,currencies);
-        System.out.println(print);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            PrintWriter print = response.getWriter();
+            List<Currencies> currencies = new CurrenciesDao().getAll();
+            objectMapper.writeValue(print, currencies);
+            System.out.println(print);
+        } catch (SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+        }
     }
 
     @Override

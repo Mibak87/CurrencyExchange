@@ -9,26 +9,23 @@ import java.util.List;
 public class CurrenciesDao implements Dao<Currencies> {
 
     @Override
-    public List<Currencies> getAll() {
+    public List<Currencies> getAll() throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies";
         List<Currencies> listCurrencies = new ArrayList<>();
-        try (Connection connection = ConnectionDataBase.connectionDB()) {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Currencies currencies = new Currencies();
-                int currenciesId = resultSet.getInt("ID");
-                currencies.setId(currenciesId);
-                String currenciesCode = resultSet.getString("Code");
-                currencies.setCode(currenciesCode);
-                String currenciesFullName = resultSet.getString("FullName");
-                currencies.setFullName(currenciesFullName);
-                String currenciesSign = resultSet.getString("Sign");
-                currencies.setSign(currenciesSign);
-                listCurrencies.add(currencies);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        Connection connection = ConnectionDataBase.connectionDB();
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            Currencies currencies = new Currencies();
+            int currenciesId = resultSet.getInt("ID");
+            currencies.setId(currenciesId);
+            String currenciesCode = resultSet.getString("Code");
+            currencies.setCode(currenciesCode);
+            String currenciesFullName = resultSet.getString("FullName");
+            currencies.setFullName(currenciesFullName);
+            String currenciesSign = resultSet.getString("Sign");
+            currencies.setSign(currenciesSign);
+            listCurrencies.add(currencies);
         }
         return listCurrencies;
     }
