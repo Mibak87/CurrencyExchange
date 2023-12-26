@@ -71,6 +71,9 @@ public class CurrenciesDao implements Dao<Currencies> {
             String currenciesSign = resultSet.getString("Sign");
             currencies.setSign(currenciesSign);
         }
+        if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
+            return null;
+        }
         return currencies;
     }
 
@@ -90,6 +93,9 @@ public class CurrenciesDao implements Dao<Currencies> {
             currencies.setFullName(currenciesFullName);
             String currenciesSign = resultSet.getString("Sign");
             currencies.setSign(currenciesSign);
+        }
+        if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
+            return null;
         }
         return currencies;
     }

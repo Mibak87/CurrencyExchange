@@ -52,18 +52,28 @@ public class ExchangeRateServlet extends HttpServlet {
         String exchangeCode = request.getPathInfo().substring(1);
         if (!exchangeCode.isEmpty()) {
             try {
-                ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
-                String rateString = request.getParameter("rate");
-                double rate = Double.parseDouble(rateString);
-                exchangeRates.setRate(rate);
-                new ExchangeRatesDao().update(exchangeRates);
+                if (new ExchangeRatesDao().getByCode(exchangeCode) != null) {
+                    String rateString = request.getParameter("rate");
+                    if (rateString != null) {
+                        ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
+                        double rate = Double.parseDouble(rateString);
+                        exchangeRates.setRate(rate);
+                        new ExchangeRatesDao().update(exchangeRates);
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                PrintWriter print = response.getWriter();
-                ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
-                objectMapper.writeValue(print, responseExchange);
-                System.out.println(print);
-                response.setStatus(HttpServletResponse.SC_OK);
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        PrintWriter print = response.getWriter();
+                        ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
+                        objectMapper.writeValue(print, responseExchange);
+                        System.out.println(print);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The required form field is missing.");
+                    }
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND,"The currency pair is missing from the database.");
+                }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");

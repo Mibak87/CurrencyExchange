@@ -34,24 +34,42 @@ public class ExchangeRatesServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String baseCurrencyCode = request.getParameter("baseCurrencyCode");
         String targetCurrencyCode = request.getParameter("targetCurrencyCode");
+        String code = baseCurrencyCode + targetCurrencyCode;
         String rateString = request.getParameter("rate");
-        double rate = Double.parseDouble(rateString);
-        try {
-            ExchangeRates exchangeRates = new ExchangeRates();
-            exchangeRates.setBaseCurrencyId(new CurrenciesDao().getByCode(baseCurrencyCode));
-            exchangeRates.setTargetCurrencyId(new CurrenciesDao().getByCode(targetCurrencyCode));
-            exchangeRates.setRate(rate);
-            new ExchangeRatesDao().save(exchangeRates);
+        if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
+            double rate = Double.parseDouble(rateString);
+            try {
+                if (new ExchangeRatesDao().getByCode(code) == null) {
+                    if (new CurrenciesDao().getByCode(baseCurrencyCode) != null &&
+                            new CurrenciesDao().getByCode(targetCurrencyCode) != null) {
+                        ExchangeRates exchangeRates = new ExchangeRates();
+                        exchangeRates.setBaseCurrencyId(new CurrenciesDao().getByCode(baseCurrencyCode));
+                        exchangeRates.setTargetCurrencyId(new CurrenciesDao().getByCode(targetCurrencyCode));
+                        exchangeRates.setRate(rate);
+                        new ExchangeRatesDao().save(exchangeRates);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
-            ExchangeRates responceExchangeRates = new ExchangeRatesDao().getByCode(baseCurrencyCode + targetCurrencyCode);
-            objectMapper.writeValue(print, responceExchangeRates);
-            System.out.println(print);
-            response.setStatus(HttpServletResponse.SC_OK);
-        } catch (SQLException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        PrintWriter print = response.getWriter();
+                        ExchangeRates responceExchangeRates = new ExchangeRatesDao().getByCode(code);
+                        objectMapper.writeValue(print, responceExchangeRates);
+                        System.out.println(print);
+                        response.setStatus(HttpServletResponse.SC_OK);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                                "One (or both) currency from the currency pair does not exist in the database.");
+                    }
+                } else {
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    response.sendError(HttpServletResponse.SC_CONFLICT,"A currency pair with this code already exists.");
+                }
+            } catch (SQLException e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The database is unavailable.");
+            }
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
         }
     }
 }
