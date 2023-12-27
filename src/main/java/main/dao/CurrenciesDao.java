@@ -27,6 +27,7 @@ public class CurrenciesDao implements Dao<Currencies> {
             currencies.setSign(currenciesSign);
             listCurrencies.add(currencies);
         }
+        connection.close();
         return listCurrencies;
     }
 
@@ -39,6 +40,7 @@ public class CurrenciesDao implements Dao<Currencies> {
         statement.setString(2, currencies.getFullName());
         statement.setString(3, currencies.getSign());
         statement.executeUpdate();
+        connection.close();
     }
 
     @Override
@@ -51,6 +53,7 @@ public class CurrenciesDao implements Dao<Currencies> {
         statement.setString(3, currencies.getSign());
         statement.setInt(4,currencies.getId());
         statement.executeUpdate();
+        connection.close();
     }
 
     @Override
@@ -71,6 +74,7 @@ public class CurrenciesDao implements Dao<Currencies> {
             String currenciesSign = resultSet.getString("Sign");
             currencies.setSign(currenciesSign);
         }
+        connection.close();
         if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
             return null;
         }
@@ -94,6 +98,7 @@ public class CurrenciesDao implements Dao<Currencies> {
             String currenciesSign = resultSet.getString("Sign");
             currencies.setSign(currenciesSign);
         }
+        connection.close();
         if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
             return null;
         }

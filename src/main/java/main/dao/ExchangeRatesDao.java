@@ -28,6 +28,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             exchangeRates.setRate(exchangeRate);
             listExchangeRates.add(exchangeRates);
         }
+        connection.close();
         return listExchangeRates;
     }
 
@@ -40,6 +41,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         statement.setInt(2, exchangeRates.getTargetCurrencyId().getId());
         statement.setDouble(3, exchangeRates.getRate());
         statement.executeUpdate();
+        connection.close();
     }
 
     @Override
@@ -52,6 +54,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         statement.setDouble(3, exchangeRates.getRate());
         statement.setInt(4,exchangeRates.getId());
         statement.executeUpdate();
+        connection.close();
     }
 
     @Override
@@ -72,6 +75,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             double exchangeRate = resultSet.getDouble("Rate");
             exchangeRates.setRate(exchangeRate);
         }
+        connection.close();
         return exchangeRates;
     }
 
@@ -100,6 +104,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                 double exchangeRate = resultSet.getDouble("Rate");
                 exchangeRates.setRate(exchangeRate);
             }
+            connection.close();
             if (exchangeRates.getBaseCurrencyId() == null || exchangeRates.getTargetCurrencyId() == null) {
                 return null;
             }
