@@ -37,7 +37,7 @@ public class Converting {
     private double getRate() throws SQLException {
         double rate = getDirectOrReverseRate(baseCode,targetCode);
         if (rate < 0) {
-            return getCrossConvertationRate();
+            return getCrossConvertingRate();
         } else {
             return rate;
         }
@@ -57,7 +57,7 @@ public class Converting {
         }
     }
 
-    private double getCrossConvertationRate() throws SQLException {
+    private double getCrossConvertingRate() throws SQLException {
         double firstRate = getDirectOrReverseRate("USD",baseCode);
         if (firstRate < 0) {
             return -1;
