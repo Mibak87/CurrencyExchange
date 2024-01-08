@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import main.dao.ExchangeRatesDao;
-import main.model.ConvertedAmount;
-import main.model.Converting;
+import main.service.ConvertedAmount;
+import main.service.Converting;
 
 import java.io.IOException;
 import java.io.PrintWriter;

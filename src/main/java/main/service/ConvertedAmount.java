@@ -1,4 +1,4 @@
-package main.model;
+package main.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import main.entity.Currencies;

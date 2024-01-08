@@ -1,4 +1,4 @@
-package main.model;
+package main.service;
 
 import main.dao.CurrenciesDao;
 import main.dao.ExchangeRatesDao;
