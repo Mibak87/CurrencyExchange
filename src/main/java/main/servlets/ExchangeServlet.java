@@ -24,9 +24,16 @@ public class ExchangeServlet extends HttpServlet {
         try {
             Converting converting = new Converting(baseCode,targetCode,amountString);
             ConvertedAmount convertedAmount = converting.Convert();
-            objectMapper.writeValue(print, convertedAmount);
-            System.out.println(print);
-            response.setStatus(HttpServletResponse.SC_OK);
+            if (convertedAmount != null) {
+                objectMapper.writeValue(print, convertedAmount);
+                System.out.println(print);
+                response.setStatus(HttpServletResponse.SC_OK);
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                objectMapper.writeValue(print, new ErrorMessage("The exchange rate was not found."));
+                System.out.println(print);
+                //response.sendError(HttpServletResponse.SC_NOT_FOUND,"The exchange rate was not found.");
+            }
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
