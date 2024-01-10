@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
 import main.dao.ExchangeRatesDao;
 import main.entity.ExchangeRates;
+import main.error.ErrorMessage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,16 +18,18 @@ import java.util.List;
 public class ExchangeRatesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PrintWriter print = response.getWriter();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
             List<ExchangeRates> exchangeRates = new ExchangeRatesDao().getAll();
             objectMapper.writeValue(print, exchangeRates);
             System.out.println(print);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+            objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+            System.out.println(print);
+            //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
         }
     }
 
@@ -36,6 +39,8 @@ public class ExchangeRatesServlet extends HttpServlet {
         String targetCurrencyCode = request.getParameter("targetCurrencyCode");
         String code = baseCurrencyCode + targetCurrencyCode;
         String rateString = request.getParameter("rate");
+        ObjectMapper objectMapper = new ObjectMapper();
+        PrintWriter print = response.getWriter();
         if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
             double rate = Double.parseDouble(rateString);
             try {
@@ -48,28 +53,35 @@ public class ExchangeRatesServlet extends HttpServlet {
                         exchangeRates.setRate(rate);
                         new ExchangeRatesDao().save(exchangeRates);
 
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        PrintWriter print = response.getWriter();
                         ExchangeRates responceExchangeRates = new ExchangeRatesDao().getByCode(code);
                         objectMapper.writeValue(print, responceExchangeRates);
                         System.out.println(print);
                         response.setStatus(HttpServletResponse.SC_OK);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND,
-                                "One (or both) currency from the currency pair does not exist in the database.");
+                        objectMapper.writeValue(print, new ErrorMessage(
+                                "One (or both) currency from the currency pair does not exist in the database."));
+                        System.out.println(print);
+                        //response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        //        "One (or both) currency from the currency pair does not exist in the database.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
-                    response.sendError(HttpServletResponse.SC_CONFLICT,"A currency pair with this code already exists.");
+                    objectMapper.writeValue(print, new ErrorMessage("A currency pair with this code already exists."));
+                    System.out.println(print);
+                    //response.sendError(HttpServletResponse.SC_CONFLICT,"A currency pair with this code already exists.");
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The database is unavailable.");
+                objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+                System.out.println(print);
+                //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The database is unavailable.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
+            objectMapper.writeValue(print, new ErrorMessage("The required form field is missing."));
+            System.out.println(print);
+            //response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
         }
     }
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
 import main.entity.Currencies;
+import main.error.ErrorMessage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,16 +17,18 @@ import java.util.List;
 public class CurrenciesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PrintWriter print = response.getWriter();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            PrintWriter print = response.getWriter();
             List<Currencies> currencies = new CurrenciesDao().getAll();
             objectMapper.writeValue(print, currencies);
             System.out.println(print);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+            objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+            System.out.println(print);
+            //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
         }
     }
 
@@ -34,6 +37,8 @@ public class CurrenciesServlet extends HttpServlet {
         String name = request.getParameter("name");
         String code = request.getParameter("code");
         String sign = request.getParameter("sign");
+        ObjectMapper objectMapper = new ObjectMapper();
+        PrintWriter print = response.getWriter();
         if (name != null && code != null && sign != null) {
             try {
                 if (new CurrenciesDao().getByCode(code) == null) {
@@ -43,23 +48,27 @@ public class CurrenciesServlet extends HttpServlet {
                     currencies.setSign(sign);
                     new CurrenciesDao().save(currencies);
 
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    PrintWriter print = response.getWriter();
                     Currencies responseCurrencies = new CurrenciesDao().getByCode(code);
                     objectMapper.writeValue(print, responseCurrencies);
                     System.out.println(print);
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
-                    response.sendError(HttpServletResponse.SC_CONFLICT,"A currency with this code already exists.");
+                    objectMapper.writeValue(print, new ErrorMessage("A currency with this code already exists."));
+                    System.out.println(print);
+                    //response.sendError(HttpServletResponse.SC_CONFLICT,"A currency with this code already exists.");
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
+                objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+                System.out.println(print);
+                //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
+            objectMapper.writeValue(print, new ErrorMessage("The required form field is missing."));
+            System.out.println(print);
+            //response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
         }
     }
 }
