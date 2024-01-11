@@ -1,6 +1,4 @@
-package main.entity;
-
-import java.math.BigDecimal;
+package main.dto;
 
 public class ExchangeRates {
     private int id;

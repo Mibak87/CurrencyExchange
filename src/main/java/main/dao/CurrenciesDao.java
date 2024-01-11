@@ -1,6 +1,6 @@
 package main.dao;
 
-import main.entity.Currencies;
+import main.dto.Currencies;
 
 import java.sql.*;
 import java.util.ArrayList;

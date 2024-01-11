@@ -1,7 +1,7 @@
 package main.dao;
 
-import main.entity.Currencies;
-import main.entity.ExchangeRates;
+import main.dto.Currencies;
+import main.dto.ExchangeRates;
 
 import java.sql.*;
 import java.util.ArrayList;

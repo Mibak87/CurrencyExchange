@@ -5,7 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.ExchangeRatesDao;
-import main.entity.ExchangeRates;
+import main.dto.ExchangeRates;
 import main.error.ErrorMessage;
 
 import java.io.IOException;
@@ -29,20 +29,14 @@ public class ExchangeRateServlet extends HttpServlet {
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     objectMapper.writeValue(print, new ErrorMessage("The exchange rate for the currencies was not found."));
-                    System.out.println(print);
-                    //response.sendError(HttpServletResponse.SC_NOT_FOUND,"The exchange rate for the currencies was not found.");
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
-                System.out.println(print);
-                //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             objectMapper.writeValue(print, new ErrorMessage("The currency codes is missing from the address."));
-            System.out.println(print);
-            //response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The currency codes is missing from the address.");
         }
     }
 
@@ -72,25 +66,18 @@ public class ExchangeRateServlet extends HttpServlet {
 
                         ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
                         objectMapper.writeValue(print, responseExchange);
-                        System.out.println(print);
                         response.setStatus(HttpServletResponse.SC_OK);
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         objectMapper.writeValue(print, new ErrorMessage("The required form field is missing."));
-                        System.out.println(print);
-                        //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The required form field is missing.");
                     }
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     objectMapper.writeValue(print, new ErrorMessage("The currency pair is missing from the database."));
-                    System.out.println(print);
-                    //response.sendError(HttpServletResponse.SC_NOT_FOUND,"The currency pair is missing from the database.");
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
-                System.out.println(print);
-                //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
             }
         }
     }

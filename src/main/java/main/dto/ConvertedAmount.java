@@ -1,7 +1,7 @@
-package main.service;
+package main.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import main.entity.Currencies;
+import main.dto.Currencies;
 
 @JsonAutoDetect
 public class ConvertedAmount {

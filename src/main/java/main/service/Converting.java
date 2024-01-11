@@ -2,7 +2,8 @@ package main.service;
 
 import main.dao.CurrenciesDao;
 import main.dao.ExchangeRatesDao;
-import main.entity.ExchangeRates;
+import main.dto.ConvertedAmount;
+import main.dto.ExchangeRates;
 
 import java.sql.SQLException;
 

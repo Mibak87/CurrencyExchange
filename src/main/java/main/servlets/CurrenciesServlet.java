@@ -5,7 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
-import main.entity.Currencies;
+import main.dto.Currencies;
 import main.error.ErrorMessage;
 
 import java.io.IOException;
@@ -22,13 +22,10 @@ public class CurrenciesServlet extends HttpServlet {
         try {
             List<Currencies> currencies = new CurrenciesDao().getAll();
             objectMapper.writeValue(print, currencies);
-            System.out.println(print);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
-            System.out.println(print);
-            //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
         }
     }
 
@@ -50,25 +47,18 @@ public class CurrenciesServlet extends HttpServlet {
 
                     Currencies responseCurrencies = new CurrenciesDao().getByCode(code);
                     objectMapper.writeValue(print, responseCurrencies);
-                    System.out.println(print);
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                     objectMapper.writeValue(print, new ErrorMessage("A currency with this code already exists."));
-                    System.out.println(print);
-                    //response.sendError(HttpServletResponse.SC_CONFLICT,"A currency with this code already exists.");
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
-                System.out.println(print);
-                //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"The database is unavailable.");
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             objectMapper.writeValue(print, new ErrorMessage("The required form field is missing."));
-            System.out.println(print);
-            //response.sendError(HttpServletResponse.SC_BAD_REQUEST,"The required form field is missing.");
         }
     }
 }

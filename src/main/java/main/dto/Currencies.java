@@ -1,4 +1,4 @@
-package main.entity;
+package main.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
