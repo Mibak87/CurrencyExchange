@@ -1,15 +1,19 @@
-package main.dto;
+package main.entity;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import main.entity.Currencies;
-
-@JsonAutoDetect
-public class ConvertedAmount {
+public class ExchangeRates {
+    private int id;
     private Currencies baseCurrency;
     private Currencies targetCurrency;
     private double rate;
-    private double amount;
-    private double convertedAmount;
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public Currencies getBaseCurrency() {
         return baseCurrency;
@@ -35,19 +39,13 @@ public class ConvertedAmount {
         this.rate = rate;
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public double getConvertedAmount() {
-        return convertedAmount;
-    }
-
-    public void setConvertedAmount(double convertedAmount) {
-        this.convertedAmount = convertedAmount;
+    @Override
+    public String toString() {
+        return "ExchangeRates{" +
+                "id=" + id +
+                ", baseCurrencyId='" + baseCurrency + '\'' +
+                ", targetCurrencyId='" + targetCurrency + '\'' +
+                ", rate=" + rate +
+                '}';
     }
 }

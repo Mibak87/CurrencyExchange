@@ -29,11 +29,11 @@ public class ExchangeServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                objectMapper.writeValue(print, new ErrorMessage("The exchange rate was not found."));
+                objectMapper.writeValue(print, new ErrorMessage("Курс обмена не найден."));
             }
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+            objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
         }
     }
 

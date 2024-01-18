@@ -5,7 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
-import main.dto.Currencies;
+import main.entity.Currencies;
 import main.error.ErrorMessage;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class CurrenciesServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+            objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
         }
     }
 
@@ -50,15 +50,15 @@ public class CurrenciesServlet extends HttpServlet {
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
-                    objectMapper.writeValue(print, new ErrorMessage("A currency with this code already exists."));
+                    objectMapper.writeValue(print, new ErrorMessage("Валюта с таким кодом уже существует."));
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+                objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            objectMapper.writeValue(print, new ErrorMessage("The required form field is missing."));
+            objectMapper.writeValue(print, new ErrorMessage("Отсутствует нужное поле формы."));
         }
     }
 }

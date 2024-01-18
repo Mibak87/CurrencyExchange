@@ -1,11 +1,13 @@
-package main.dto;
+package main.entity;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect
 public class Currencies {
     private int id;
     private String code;
+    @JsonProperty("name")
     private String fullName;
     private String sign;
 

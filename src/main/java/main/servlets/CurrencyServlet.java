@@ -5,7 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
-import main.dto.Currencies;
+import main.entity.Currencies;
 import main.error.ErrorMessage;
 
 import java.io.IOException;
@@ -27,15 +27,15 @@ public class CurrencyServlet extends HttpServlet {
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    objectMapper.writeValue(print, new ErrorMessage("The currency was not found."));
+                    objectMapper.writeValue(print, new ErrorMessage("Валюта не найдена."));
                 }
             } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                objectMapper.writeValue(print, new ErrorMessage("The database is unavailable."));
+                objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            objectMapper.writeValue(print, new ErrorMessage("The currency code is missing from the address."));
+            objectMapper.writeValue(print, new ErrorMessage("Код валюты отсутствует в адресе."));
         }
     }
 
