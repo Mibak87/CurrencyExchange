@@ -11,6 +11,7 @@ import main.error.ErrorMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @WebServlet(name = "CurrencyServlet", value = "/currency/*")
 public class CurrencyServlet extends HttpServlet {
@@ -21,9 +22,9 @@ public class CurrencyServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         if (!currencyCode.isEmpty()) {
             try {
-                Currencies currencies = new CurrenciesDao().getByCode(currencyCode);
-                if (currencies != null) {
-                    objectMapper.writeValue(print, currencies);
+                Optional<Currencies> currenciesOptional = new CurrenciesDao().getByCode(currencyCode);
+                if (currenciesOptional.isPresent()) {
+                    objectMapper.writeValue(print, currenciesOptional.get());
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);

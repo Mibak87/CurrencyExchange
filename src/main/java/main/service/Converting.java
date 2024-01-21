@@ -6,11 +6,13 @@ import main.dto.ConvertedAmount;
 import main.entity.ExchangeRates;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class Converting {
     private final String baseCode;
     private final String targetCode;
     private final String amountString;
+    private final String CROSS_CURRENCY = "USD";
 
     public Converting(String baseCode, String targetCode, String amountString) {
         this.baseCode = baseCode;
@@ -18,20 +20,20 @@ public class Converting {
         this.amountString = amountString;
     }
 
-    public ConvertedAmount Convert() throws SQLException {
+    public Optional<ConvertedAmount> Convert() throws SQLException {
         double amount = Double.parseDouble(amountString);
         double rate = getRate();
         if (rate < 0) {
-            return null;
+            return Optional.empty();
         } else {
             double convertedValue = amount * rate;
             ConvertedAmount convertedAmount = new ConvertedAmount();
-            convertedAmount.setBaseCurrency(new CurrenciesDao().getByCode(baseCode));
-            convertedAmount.setTargetCurrency(new CurrenciesDao().getByCode(targetCode));
+            convertedAmount.setBaseCurrency(new CurrenciesDao().getByCode(baseCode).get());
+            convertedAmount.setTargetCurrency(new CurrenciesDao().getByCode(targetCode).get());
             convertedAmount.setRate(rate);
             convertedAmount.setAmount(amount);
             convertedAmount.setConvertedAmount(convertedValue);
-            return convertedAmount;
+            return Optional.of(convertedAmount);
         }
     }
 
@@ -45,25 +47,25 @@ public class Converting {
     }
 
     private double getDirectOrReverseRate(String baseCode, String targetCode) throws SQLException {
-        ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(baseCode + targetCode);
-        if (exchangeRates == null) {
-            ExchangeRates exchangeReverseRates = new ExchangeRatesDao().getByCode(targetCode + baseCode);
-            if (exchangeReverseRates == null) {
-               return -1;
-            } else {
-                return (1 / exchangeReverseRates.getRate());
-            }
+        Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(baseCode + targetCode);
+        if (exchangeRatesOptional.isPresent()) {
+            return exchangeRatesOptional.get().getRate();
         } else {
-            return exchangeRates.getRate();
+            Optional<ExchangeRates> reverseRatesOptional = new ExchangeRatesDao().getByCode(targetCode + baseCode);
+            if (reverseRatesOptional.isPresent()) {
+                return (1 / reverseRatesOptional.get().getRate());
+            } else {
+                return -1;
+            }
         }
     }
 
     private double getCrossConvertingRate() throws SQLException {
-        double firstRate = getDirectOrReverseRate("USD",baseCode);
+        double firstRate = getDirectOrReverseRate(CROSS_CURRENCY,baseCode);
         if (firstRate < 0) {
             return -1;
         } else {
-            double secondRate = getDirectOrReverseRate("USD",targetCode);
+            double secondRate = getDirectOrReverseRate(CROSS_CURRENCY,targetCode);
             return firstRate/secondRate;
         }
     }

@@ -11,6 +11,7 @@ import main.error.ErrorMessage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @WebServlet(name = "ExchangeRateServlet", value = "/exchangerate/*")
 public class ExchangeRateServlet extends HttpServlet {
@@ -21,10 +22,9 @@ public class ExchangeRateServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         if (!exchangeCode.isEmpty()) {
             try {
-                ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
-                if (exchangeRates != null) {
-                    objectMapper.writeValue(print, exchangeRates);
-                    System.out.println(print);
+                Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(exchangeCode);
+                if (exchangeRatesOptional.isPresent()) {
+                    objectMapper.writeValue(print, exchangeRatesOptional.get());
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -56,17 +56,19 @@ public class ExchangeRateServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         if (!exchangeCode.isEmpty()) {
             try {
-                if (new ExchangeRatesDao().getByCode(exchangeCode) != null) {
+                Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(exchangeCode);
+                if (exchangeRatesOptional.isPresent()) {
                     String rateString = request.getParameter("rate");
                     if (rateString != null) {
-                        ExchangeRates exchangeRates = new ExchangeRatesDao().getByCode(exchangeCode);
                         double rate = Double.parseDouble(rateString);
+                        ExchangeRates exchangeRates = exchangeRatesOptional.get();
                         exchangeRates.setRate(rate);
                         new ExchangeRatesDao().update(exchangeRates);
-
-                        ExchangeRates responseExchange = new ExchangeRatesDao().getByCode(exchangeCode);
-                        objectMapper.writeValue(print, responseExchange);
-                        response.setStatus(HttpServletResponse.SC_OK);
+                        Optional<ExchangeRates> exchangeOptionalResponse = new ExchangeRatesDao().getByCode(exchangeCode);
+                        if (exchangeOptionalResponse.isPresent()) {
+                            objectMapper.writeValue(print, exchangeOptionalResponse.get());
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        }
                     } else {
                         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         objectMapper.writeValue(print, new ErrorMessage("Отсутствует нужное поле формы."));

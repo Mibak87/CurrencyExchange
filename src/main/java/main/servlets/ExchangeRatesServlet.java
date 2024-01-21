@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import main.dao.CurrenciesDao;
 import main.dao.ExchangeRatesDao;
+import main.entity.Currencies;
 import main.entity.ExchangeRates;
 import main.error.ErrorMessage;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @WebServlet(name = "ExchangeRatesServlet", value = "/exchangerates")
 public class ExchangeRatesServlet extends HttpServlet {
@@ -41,18 +43,23 @@ public class ExchangeRatesServlet extends HttpServlet {
         if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
             double rate = Double.parseDouble(rateString);
             try {
-                if (new ExchangeRatesDao().getByCode(code) == null) {
-                    if (new CurrenciesDao().getByCode(baseCurrencyCode) != null &&
-                            new CurrenciesDao().getByCode(targetCurrencyCode) != null) {
+                if (new ExchangeRatesDao().getByCode(code).isEmpty()) {
+                    Optional<Currencies> baseCurrencyOptional = new CurrenciesDao().getByCode(baseCurrencyCode);
+                    Optional<Currencies> targetCurrencyOptional = new CurrenciesDao().getByCode(targetCurrencyCode);
+                    if (baseCurrencyOptional.isPresent() && targetCurrencyOptional.isPresent()) {
                         ExchangeRates exchangeRates = new ExchangeRates();
-                        exchangeRates.setBaseCurrency(new CurrenciesDao().getByCode(baseCurrencyCode));
-                        exchangeRates.setTargetCurrency(new CurrenciesDao().getByCode(targetCurrencyCode));
+                        exchangeRates.setBaseCurrency(baseCurrencyOptional.get());
+                        exchangeRates.setTargetCurrency(targetCurrencyOptional.get());
                         exchangeRates.setRate(rate);
                         new ExchangeRatesDao().save(exchangeRates);
-
-                        ExchangeRates responceExchangeRates = new ExchangeRatesDao().getByCode(code);
-                        objectMapper.writeValue(print, responceExchangeRates);
-                        response.setStatus(HttpServletResponse.SC_OK);
+                        Optional<ExchangeRates> exchangeOptionalResponse = new ExchangeRatesDao().getByCode(code);
+                        if (exchangeOptionalResponse.isPresent()) {
+                            objectMapper.writeValue(print, exchangeOptionalResponse.get());
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_CONFLICT);
+                            objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
+                        }
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         objectMapper.writeValue(print, new ErrorMessage(

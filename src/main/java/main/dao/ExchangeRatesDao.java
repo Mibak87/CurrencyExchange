@@ -7,6 +7,7 @@ import main.utils.Utils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ExchangeRatesDao implements Dao<ExchangeRates> {
     private final String path = Utils.getDataBasePath();
@@ -27,10 +28,16 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             ExchangeRates exchangeRates = new ExchangeRates();
             int exchangeId = resultSet.getInt("ID");
             exchangeRates.setId(exchangeId);
-            Currencies exchangeBaseId = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
-            exchangeRates.setBaseCurrency(exchangeBaseId);
-            Currencies exchangeTaggetId = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
-            exchangeRates.setTargetCurrency(exchangeTaggetId);
+            Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
+            if (baseOpt.isPresent()) {
+                Currencies exchangeBaseId = baseOpt.get();
+                exchangeRates.setBaseCurrency(exchangeBaseId);
+            }
+            Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
+            if (targetOpt.isPresent()) {
+                Currencies exchangeTargetId = targetOpt.get();
+                exchangeRates.setTargetCurrency(exchangeTargetId);
+            }
             double exchangeRate = resultSet.getDouble("Rate");
             exchangeRates.setRate(exchangeRate);
             listExchangeRates.add(exchangeRates);
@@ -75,7 +82,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     }
 
     @Override
-    public ExchangeRates getById(int id) throws SQLException {
+    public Optional<ExchangeRates> getById(int id) throws SQLException {
         String sqlQuery = "SELECT * FROM ExchangeRates WHERE ID=?";
         ExchangeRates exchangeRates = new ExchangeRates();
         try {
@@ -90,25 +97,31 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         while (resultSet.next()) {
             int exchangeId = resultSet.getInt("ID");
             exchangeRates.setId(exchangeId);
-            Currencies exchangeBaseId = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
-            exchangeRates.setBaseCurrency(exchangeBaseId);
-            Currencies exchangeTaggetId = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
-            exchangeRates.setTargetCurrency(exchangeTaggetId);
+            Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
+            if (baseOpt.isPresent()) {
+                Currencies exchangeBaseId = baseOpt.get();
+                exchangeRates.setBaseCurrency(exchangeBaseId);
+            }
+            Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
+            if (targetOpt.isPresent()) {
+                Currencies exchangeTargetId = targetOpt.get();
+                exchangeRates.setTargetCurrency(exchangeTargetId);
+            }
             double exchangeRate = resultSet.getDouble("Rate");
             exchangeRates.setRate(exchangeRate);
         }
         connection.close();
-        return exchangeRates;
+        return Optional.ofNullable(exchangeRates);
     }
 
-    public ExchangeRates getByCode(String code) throws SQLException {
+    public Optional<ExchangeRates> getByCode(String code) throws SQLException {
         String baseCode = code.substring(0,3);
         String targetCode = code.substring(3);
-        Currencies baseCurrencies = new CurrenciesDao().getByCode(baseCode);
-        Currencies targetCurrencies = new CurrenciesDao().getByCode(targetCode);
-        if (baseCurrencies != null && targetCurrencies != null) {
-            int baseId = baseCurrencies.getId();
-            int targetId = targetCurrencies.getId();
+        Optional<Currencies> checkingBaseOpt = new CurrenciesDao().getByCode(baseCode);
+        Optional<Currencies> checkingTargetOpt = new CurrenciesDao().getByCode(targetCode);
+        if (checkingBaseOpt.isPresent() && checkingTargetOpt.isPresent()) {
+            int baseId = checkingBaseOpt.get().getId();
+            int targetId =checkingTargetOpt.get().getId();
             String sqlQuery = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId=? AND TargetCurrencyId=?";
             ExchangeRates exchangeRates = new ExchangeRates();
             try {
@@ -124,20 +137,26 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             while (resultSet.next()) {
                 int exchangeId = resultSet.getInt("ID");
                 exchangeRates.setId(exchangeId);
-                Currencies exchangeBaseId = new CurrenciesDao().getById(baseId);
-                exchangeRates.setBaseCurrency(exchangeBaseId);
-                Currencies exchangeTaggetId = new CurrenciesDao().getById(targetId);
-                exchangeRates.setTargetCurrency(exchangeTaggetId);
+                Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
+                if (baseOpt.isPresent()) {
+                    Currencies exchangeBaseId = baseOpt.get();
+                    exchangeRates.setBaseCurrency(exchangeBaseId);
+                }
+                Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
+                if (targetOpt.isPresent()) {
+                    Currencies exchangeTargetId = targetOpt.get();
+                    exchangeRates.setTargetCurrency(exchangeTargetId);
+                }
                 double exchangeRate = resultSet.getDouble("Rate");
                 exchangeRates.setRate(exchangeRate);
             }
             connection.close();
             if (exchangeRates.getBaseCurrency() == null || exchangeRates.getTargetCurrency() == null) {
-                return null;
+                exchangeRates = null;
             }
-            return exchangeRates;
+            return Optional.ofNullable(exchangeRates);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 }

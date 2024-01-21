@@ -11,6 +11,7 @@ import main.service.Converting;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @WebServlet(name = "ExchangeServlet", value = "/exchange")
 public class ExchangeServlet extends HttpServlet {
@@ -23,9 +24,9 @@ public class ExchangeServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         try {
             Converting converting = new Converting(baseCode,targetCode,amountString);
-            ConvertedAmount convertedAmount = converting.Convert();
-            if (convertedAmount != null) {
-                objectMapper.writeValue(print, convertedAmount);
+            Optional<ConvertedAmount> convertedAmountOptional = converting.Convert();
+            if (convertedAmountOptional.isPresent()) {
+                objectMapper.writeValue(print, convertedAmountOptional.get());
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);

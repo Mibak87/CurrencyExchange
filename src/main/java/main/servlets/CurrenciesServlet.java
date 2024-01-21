@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @WebServlet(name = "Currencies", value = "/currencies")
 public class CurrenciesServlet extends HttpServlet {
@@ -38,16 +39,20 @@ public class CurrenciesServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         if (name != null && code != null && sign != null) {
             try {
-                if (new CurrenciesDao().getByCode(code) == null) {
+                if (new CurrenciesDao().getByCode(code).isEmpty()) {
                     Currencies currencies = new Currencies();
                     currencies.setFullName(name);
                     currencies.setCode(code);
                     currencies.setSign(sign);
                     new CurrenciesDao().save(currencies);
-
-                    Currencies responseCurrencies = new CurrenciesDao().getByCode(code);
-                    objectMapper.writeValue(print, responseCurrencies);
-                    response.setStatus(HttpServletResponse.SC_OK);
+                    Optional<Currencies> currenciesOptionalResponse = new CurrenciesDao().getByCode(code);
+                    if (currenciesOptionalResponse.isPresent()) {
+                        objectMapper.writeValue(print, currenciesOptionalResponse.get());
+                        response.setStatus(HttpServletResponse.SC_OK);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_CONFLICT);
+                        objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
+                    }
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                     objectMapper.writeValue(print, new ErrorMessage("Валюта с таким кодом уже существует."));

@@ -6,6 +6,7 @@ import main.utils.Utils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CurrenciesDao implements Dao<Currencies> {
     private final String path = Utils.getDataBasePath();
@@ -73,7 +74,7 @@ public class CurrenciesDao implements Dao<Currencies> {
     }
 
     @Override
-    public Currencies getById(int id) throws SQLException {
+    public Optional<Currencies> getById(int id) throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies WHERE ID=?";
         Currencies currencies = new Currencies();
         try {
@@ -97,12 +98,12 @@ public class CurrenciesDao implements Dao<Currencies> {
         }
         connection.close();
         if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
-            return null;
+            currencies = null;
         }
-        return currencies;
+        return Optional.ofNullable(currencies);
     }
 
-    public Currencies getByCode(String code) throws SQLException {
+    public Optional<Currencies> getByCode(String code) throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies WHERE Code=?";
         Currencies currencies = new Currencies();
         try {
@@ -126,8 +127,8 @@ public class CurrenciesDao implements Dao<Currencies> {
         }
         connection.close();
         if (currencies.getCode() == null || currencies.getFullName() == null || currencies.getSign() == null) {
-            return null;
+            currencies = null;
         }
-        return currencies;
+        return Optional.ofNullable(currencies);
     }
 }
