@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"id", "code", "fullName", "sign"})
+@JsonPropertyOrder({"id", "fullName", "code", "sign"})
 public class Currencies {
     private int id;
     private String code;
