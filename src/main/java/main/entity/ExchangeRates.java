@@ -1,10 +1,15 @@
 package main.entity;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.math.BigDecimal;
+
+@JsonPropertyOrder({"id", "baseCurrency", "targetCurrency", "rate"})
 public class ExchangeRates {
     private int id;
     private Currencies baseCurrency;
     private Currencies targetCurrency;
-    private double rate;
+    private BigDecimal rate;
 
 
     public int getId() {
@@ -31,11 +36,11 @@ public class ExchangeRates {
         this.targetCurrency = targetCurrency;
     }
 
-    public double getRate() {
+    public BigDecimal getRate() {
         return rate;
     }
 
-    public void setRate(double rate) {
+    public void setRate(BigDecimal rate) {
         this.rate = rate;
     }
 

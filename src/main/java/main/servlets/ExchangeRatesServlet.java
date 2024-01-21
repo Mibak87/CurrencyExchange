@@ -12,6 +12,7 @@ import main.error.ErrorMessage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class ExchangeRatesServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper();
         PrintWriter print = response.getWriter();
         if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
-            double rate = Double.parseDouble(rateString);
+            BigDecimal rate = new BigDecimal(rateString);
             try {
                 if (new ExchangeRatesDao().getByCode(code).isEmpty()) {
                     Optional<Currencies> baseCurrencyOptional = new CurrenciesDao().getByCode(baseCurrencyCode);

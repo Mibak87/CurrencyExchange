@@ -5,6 +5,8 @@ import main.dao.ExchangeRatesDao;
 import main.dto.ConvertedAmount;
 import main.entity.ExchangeRates;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -21,12 +23,12 @@ public class Converting {
     }
 
     public Optional<ConvertedAmount> Convert() throws SQLException {
-        double amount = Double.parseDouble(amountString);
-        double rate = getRate();
-        if (rate < 0) {
+        BigDecimal amount = new BigDecimal(amountString);
+        BigDecimal rate = getRate();
+        if (rate.signum() < 0) {
             return Optional.empty();
         } else {
-            double convertedValue = amount * rate;
+            BigDecimal convertedValue = amount.multiply(rate);
             ConvertedAmount convertedAmount = new ConvertedAmount();
             convertedAmount.setBaseCurrency(new CurrenciesDao().getByCode(baseCode).get());
             convertedAmount.setTargetCurrency(new CurrenciesDao().getByCode(targetCode).get());
@@ -37,36 +39,36 @@ public class Converting {
         }
     }
 
-    private double getRate() throws SQLException {
-        double rate = getDirectOrReverseRate(baseCode,targetCode);
-        if (rate < 0) {
+    private BigDecimal getRate() throws SQLException {
+        BigDecimal rate = getDirectOrReverseRate(baseCode,targetCode);
+        if (rate.signum() < 0) {
             return getCrossConvertingRate();
         } else {
             return rate;
         }
     }
 
-    private double getDirectOrReverseRate(String baseCode, String targetCode) throws SQLException {
+    private BigDecimal getDirectOrReverseRate(String baseCode, String targetCode) throws SQLException {
         Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(baseCode + targetCode);
         if (exchangeRatesOptional.isPresent()) {
             return exchangeRatesOptional.get().getRate();
         } else {
             Optional<ExchangeRates> reverseRatesOptional = new ExchangeRatesDao().getByCode(targetCode + baseCode);
             if (reverseRatesOptional.isPresent()) {
-                return (1 / reverseRatesOptional.get().getRate());
+                return new BigDecimal(1).divide(reverseRatesOptional.get().getRate(),2,RoundingMode.DOWN);
             } else {
-                return -1;
+                return new BigDecimal(-1);
             }
         }
     }
 
-    private double getCrossConvertingRate() throws SQLException {
-        double firstRate = getDirectOrReverseRate(CROSS_CURRENCY,baseCode);
-        if (firstRate < 0) {
-            return -1;
+    private BigDecimal getCrossConvertingRate() throws SQLException {
+        BigDecimal firstRate = getDirectOrReverseRate(CROSS_CURRENCY,baseCode);
+        if (firstRate.signum() < 0) {
+            return new BigDecimal(-1);
         } else {
-            double secondRate = getDirectOrReverseRate(CROSS_CURRENCY,targetCode);
-            return firstRate/secondRate;
+            BigDecimal secondRate = getDirectOrReverseRate(CROSS_CURRENCY,targetCode);
+            return firstRate.divide(secondRate,2, RoundingMode.DOWN);
         }
     }
 }

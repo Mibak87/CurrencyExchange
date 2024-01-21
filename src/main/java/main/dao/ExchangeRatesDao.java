@@ -4,6 +4,8 @@ import main.entity.Currencies;
 import main.entity.ExchangeRates;
 import main.utils.Utils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                 Currencies exchangeTargetId = targetOpt.get();
                 exchangeRates.setTargetCurrency(exchangeTargetId);
             }
-            double exchangeRate = resultSet.getDouble("Rate");
+            BigDecimal exchangeRate = resultSet.getBigDecimal("Rate").setScale(2, RoundingMode.DOWN);
             exchangeRates.setRate(exchangeRate);
             listExchangeRates.add(exchangeRates);
         }
@@ -58,7 +60,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
         statement.setInt(1, exchangeRates.getBaseCurrency().getId());
         statement.setInt(2, exchangeRates.getTargetCurrency().getId());
-        statement.setDouble(3, exchangeRates.getRate());
+        statement.setBigDecimal(3, exchangeRates.getRate());
         statement.executeUpdate();
         connection.close();
     }
@@ -75,7 +77,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
         statement.setInt(1, exchangeRates.getBaseCurrency().getId());
         statement.setInt(2, exchangeRates.getTargetCurrency().getId());
-        statement.setDouble(3, exchangeRates.getRate());
+        statement.setBigDecimal(3, exchangeRates.getRate());
         statement.setInt(4,exchangeRates.getId());
         statement.executeUpdate();
         connection.close();
@@ -107,11 +109,11 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                 Currencies exchangeTargetId = targetOpt.get();
                 exchangeRates.setTargetCurrency(exchangeTargetId);
             }
-            double exchangeRate = resultSet.getDouble("Rate");
+            BigDecimal exchangeRate = resultSet.getBigDecimal("Rate").setScale(2, RoundingMode.DOWN);
             exchangeRates.setRate(exchangeRate);
         }
         connection.close();
-        return Optional.ofNullable(exchangeRates);
+        return Optional.of(exchangeRates);
     }
 
     public Optional<ExchangeRates> getByCode(String code) throws SQLException {
@@ -147,7 +149,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
                     Currencies exchangeTargetId = targetOpt.get();
                     exchangeRates.setTargetCurrency(exchangeTargetId);
                 }
-                double exchangeRate = resultSet.getDouble("Rate");
+                BigDecimal exchangeRate = resultSet.getBigDecimal("Rate");
                 exchangeRates.setRate(exchangeRate);
             }
             connection.close();

@@ -10,6 +10,7 @@ import main.error.ErrorMessage;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class ExchangeRateServlet extends HttpServlet {
                 if (exchangeRatesOptional.isPresent()) {
                     String rateString = request.getParameter("rate");
                     if (rateString != null) {
-                        double rate = Double.parseDouble(rateString);
+                        BigDecimal rate = new BigDecimal(rateString);
                         ExchangeRates exchangeRates = exchangeRatesOptional.get();
                         exchangeRates.setRate(rate);
                         new ExchangeRatesDao().update(exchangeRates);
