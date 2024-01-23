@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+
 @WebServlet(name = "ExchangeRatesServlet", value = "/exchangerates")
 public class ExchangeRatesServlet extends HttpServlet {
     @Override
@@ -44,35 +45,36 @@ public class ExchangeRatesServlet extends HttpServlet {
         if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
             BigDecimal rate = new BigDecimal(rateString);
             try {
-                if (new ExchangeRatesDao().getByCode(code).isEmpty()) {
-                    Optional<Currencies> baseCurrencyOptional = new CurrenciesDao().getByCode(baseCurrencyCode);
-                    Optional<Currencies> targetCurrencyOptional = new CurrenciesDao().getByCode(targetCurrencyCode);
-                    if (baseCurrencyOptional.isPresent() && targetCurrencyOptional.isPresent()) {
-                        ExchangeRates exchangeRates = new ExchangeRates();
-                        exchangeRates.setBaseCurrency(baseCurrencyOptional.get());
-                        exchangeRates.setTargetCurrency(targetCurrencyOptional.get());
-                        exchangeRates.setRate(rate);
-                        new ExchangeRatesDao().save(exchangeRates);
-                        Optional<ExchangeRates> exchangeOptionalResponse = new ExchangeRatesDao().getByCode(code);
-                        if (exchangeOptionalResponse.isPresent()) {
-                            objectMapper.writeValue(print, exchangeOptionalResponse.get());
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        } else {
-                            response.setStatus(HttpServletResponse.SC_CONFLICT);
-                            objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
-                        }
+                //if (new ExchangeRatesDao().getByCode(code).isEmpty()) {
+                Optional<Currencies> baseCurrencyOptional = new CurrenciesDao().getByCode(baseCurrencyCode);
+                Optional<Currencies> targetCurrencyOptional = new CurrenciesDao().getByCode(targetCurrencyCode);
+                if (baseCurrencyOptional.isPresent() && targetCurrencyOptional.isPresent()) {
+                    ExchangeRates exchangeRates = new ExchangeRates();
+                    exchangeRates.setBaseCurrency(baseCurrencyOptional.get());
+                    exchangeRates.setTargetCurrency(targetCurrencyOptional.get());
+                    exchangeRates.setRate(rate);
+                    new ExchangeRatesDao().save(exchangeRates);
+                    Optional<ExchangeRates> exchangeOptionalResponse = new ExchangeRatesDao().getByCode(code);
+                    if (exchangeOptionalResponse.isPresent()) {
+                        objectMapper.writeValue(print, exchangeOptionalResponse.get());
+                        response.setStatus(HttpServletResponse.SC_OK);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        objectMapper.writeValue(print, new ErrorMessage(
-                                "Одна (или обе) валюта из валютной пары не существует в базе данных."));
+                        response.setStatus(HttpServletResponse.SC_CONFLICT);
+                        objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
                     }
                 } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    objectMapper.writeValue(print, new ErrorMessage(
+                            "Одна (или обе) валюта из валютной пары не существует в базе данных."));
+                }
+            } catch (SQLException e) {
+                if (e.getErrorCode() == 19) {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                     objectMapper.writeValue(print, new ErrorMessage("Валютная пара с таким кодом уже существует."));
                 }
-            } catch (SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
+                e.printStackTrace();
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

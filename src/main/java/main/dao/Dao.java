@@ -1,6 +1,5 @@
 package main.dao;
 
-import main.entity.Currencies;
 
 import java.sql.SQLException;
 import java.util.List;
