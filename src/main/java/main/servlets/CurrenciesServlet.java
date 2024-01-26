@@ -39,27 +39,27 @@ public class CurrenciesServlet extends HttpServlet {
         PrintWriter print = response.getWriter();
         if (name != null && code != null && sign != null) {
             try {
-                if (new CurrenciesDao().getByCode(code).isEmpty()) {
-                    Currencies currencies = new Currencies();
-                    currencies.setFullName(name);
-                    currencies.setCode(code);
-                    currencies.setSign(sign);
-                    new CurrenciesDao().save(currencies);
-                    Optional<Currencies> currenciesOptionalResponse = new CurrenciesDao().getByCode(code);
-                    if (currenciesOptionalResponse.isPresent()) {
-                        objectMapper.writeValue(print, currenciesOptionalResponse.get());
-                        response.setStatus(HttpServletResponse.SC_OK);
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_CONFLICT);
-                        objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
-                    }
+                Currencies currencies = new Currencies();
+                currencies.setFullName(name);
+                currencies.setCode(code);
+                currencies.setSign(sign);
+                new CurrenciesDao().save(currencies);
+                Optional<Currencies> currenciesOptionalResponse = new CurrenciesDao().getByCode(code);
+                if (currenciesOptionalResponse.isPresent()) {
+                    objectMapper.writeValue(print, currenciesOptionalResponse.get());
+                    response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
-                    objectMapper.writeValue(print, new ErrorMessage("Валюта с таким кодом уже существует."));
+                    objectMapper.writeValue(print, new ErrorMessage("Вставка не удалась."));
                 }
             } catch (SQLException e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
+                if (e.getErrorCode() == 19) {
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    objectMapper.writeValue(print, new ErrorMessage("Валютная пара с таким кодом уже существует."));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
+                }
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

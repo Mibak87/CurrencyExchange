@@ -45,7 +45,6 @@ public class ExchangeRatesServlet extends HttpServlet {
         if (baseCurrencyCode != null && targetCurrencyCode != null && rateString != null) {
             BigDecimal rate = new BigDecimal(rateString);
             try {
-                //if (new ExchangeRatesDao().getByCode(code).isEmpty()) {
                 Optional<Currencies> baseCurrencyOptional = new CurrenciesDao().getByCode(baseCurrencyCode);
                 Optional<Currencies> targetCurrencyOptional = new CurrenciesDao().getByCode(targetCurrencyCode);
                 if (baseCurrencyOptional.isPresent() && targetCurrencyOptional.isPresent()) {
@@ -71,10 +70,10 @@ public class ExchangeRatesServlet extends HttpServlet {
                 if (e.getErrorCode() == 19) {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                     objectMapper.writeValue(print, new ErrorMessage("Валютная пара с таким кодом уже существует."));
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
                 }
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                objectMapper.writeValue(print, new ErrorMessage("Ошибка подключения к базе данных."));
-                e.printStackTrace();
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
