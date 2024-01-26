@@ -59,8 +59,9 @@ public class ExchangeRateServlet extends HttpServlet {
             try {
                 Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(exchangeCode);
                 if (exchangeRatesOptional.isPresent()) {
-                    String rateString = request.getParameter("rate");
-                    if (rateString != null) {
+                    String rateString = request.getReader().readLine();
+                    if (rateString != null && rateString.contains("rate")) {
+                        rateString = rateString.replace("rate=","");
                         BigDecimal rate = new BigDecimal(rateString);
                         ExchangeRates exchangeRates = exchangeRatesOptional.get();
                         exchangeRates.setRate(rate);
