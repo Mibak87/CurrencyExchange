@@ -4,7 +4,6 @@ import main.entity.Currencies;
 import main.entity.ExchangeRates;
 import main.utils.Utils;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +15,24 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
 
     @Override
     public List<ExchangeRates> getAll() throws SQLException {
-        String sqlQuery = "SELECT * FROM ExchangeRates";
+        String sqlQuery = """
+                            SELECT
+                                er.ID AS id,
+                                base_cur.ID AS base_id,
+                                base_cur.Code AS base_code,
+                                base_cur.FullName AS base_name,
+                                base_cur.Sign AS base_sign,
+                                target_cur.ID AS target_id,
+                                target_cur.Code AS target_code,
+                                target_cur.FullName AS target_name,
+                                target_cur.Sign AS target_sign,
+                                er.rate AS rate
+                            FROM ExchangeRates AS er
+                            JOIN Currencies AS base_cur ON
+                                er.BaseCurrencyId = base_cur.ID
+                            JOIN Currencies AS target_cur ON
+                                er.TargetCurrencyId = target_cur.ID
+                            """;
         List<ExchangeRates> listExchangeRates = new ArrayList<>();
         try {
             Class.forName("org.sqlite.JDBC");
@@ -28,20 +44,20 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
             ExchangeRates exchangeRates = new ExchangeRates();
-            int exchangeId = resultSet.getInt("ID");
-            exchangeRates.setId(exchangeId);
-            Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
-            if (baseOpt.isPresent()) {
-                Currencies exchangeBaseId = baseOpt.get();
-                exchangeRates.setBaseCurrency(exchangeBaseId);
-            }
-            Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
-            if (targetOpt.isPresent()) {
-                Currencies exchangeTargetId = targetOpt.get();
-                exchangeRates.setTargetCurrency(exchangeTargetId);
-            }
-            BigDecimal exchangeRate = resultSet.getBigDecimal("Rate").setScale(2, RoundingMode.DOWN);
-            exchangeRates.setRate(exchangeRate);
+            exchangeRates.setId(resultSet.getInt("id"));
+            Currencies baseCurrency = new Currencies();
+            baseCurrency.setId(resultSet.getInt("base_id"));
+            baseCurrency.setCode(resultSet.getString("base_code"));
+            baseCurrency.setFullName(resultSet.getString("base_name"));
+            baseCurrency.setSign(resultSet.getString("base_sign"));
+            exchangeRates.setBaseCurrency(baseCurrency);
+            Currencies targetCurrency = new Currencies();
+            targetCurrency.setId(resultSet.getInt("target_id"));
+            targetCurrency.setCode(resultSet.getString("target_code"));
+            targetCurrency.setFullName(resultSet.getString("target_name"));
+            targetCurrency.setSign(resultSet.getString("target_sign"));
+            exchangeRates.setTargetCurrency(targetCurrency);
+            exchangeRates.setRate(resultSet.getBigDecimal("Rate"));
             listExchangeRates.add(exchangeRates);
         }
         connection.close();
@@ -85,8 +101,25 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
 
     @Override
     public Optional<ExchangeRates> getById(int id) throws SQLException {
-        String sqlQuery = "SELECT * FROM ExchangeRates WHERE ID=?";
-        ExchangeRates exchangeRates = new ExchangeRates();
+        String sqlQuery = """
+                            SELECT
+                                er.ID AS id,
+                                base_cur.ID AS base_id,
+                                base_cur.Code AS base_code,
+                                base_cur.FullName AS base_name,
+                                base_cur.Sign AS base_sign,
+                                target_cur.ID AS target_id,
+                                target_cur.Code AS target_code,
+                                target_cur.FullName AS target_name,
+                                target_cur.Sign AS target_sign,
+                                er.rate AS rate
+                            FROM ExchangeRates AS er
+                            JOIN Currencies AS base_cur ON
+                                er.BaseCurrencyId = base_cur.ID
+                            JOIN Currencies AS target_cur ON
+                                er.TargetCurrencyId = target_cur.ID
+                            WHERE er.ID=?
+                            """;
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -96,22 +129,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
         statement.setInt(1, id);
         ResultSet resultSet = statement.executeQuery();
-        while (resultSet.next()) {
-            int exchangeId = resultSet.getInt("ID");
-            exchangeRates.setId(exchangeId);
-            Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
-            if (baseOpt.isPresent()) {
-                Currencies exchangeBaseId = baseOpt.get();
-                exchangeRates.setBaseCurrency(exchangeBaseId);
-            }
-            Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
-            if (targetOpt.isPresent()) {
-                Currencies exchangeTargetId = targetOpt.get();
-                exchangeRates.setTargetCurrency(exchangeTargetId);
-            }
-            BigDecimal exchangeRate = resultSet.getBigDecimal("Rate").setScale(2, RoundingMode.DOWN);
-            exchangeRates.setRate(exchangeRate);
-        }
+        ExchangeRates exchangeRates = getExchangeRates(resultSet);
         connection.close();
         return Optional.of(exchangeRates);
     }
@@ -119,13 +137,26 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
     public Optional<ExchangeRates> getByCode(String code) throws SQLException {
         String baseCode = code.substring(0,3);
         String targetCode = code.substring(3);
-        Optional<Currencies> checkingBaseOpt = new CurrenciesDao().getByCode(baseCode);
-        Optional<Currencies> checkingTargetOpt = new CurrenciesDao().getByCode(targetCode);
-        if (checkingBaseOpt.isPresent() && checkingTargetOpt.isPresent()) {
-            int baseId = checkingBaseOpt.get().getId();
-            int targetId =checkingTargetOpt.get().getId();
-            String sqlQuery = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId=? AND TargetCurrencyId=?";
-            ExchangeRates exchangeRates = new ExchangeRates();
+            String sqlQuery = """
+                            SELECT
+                                er.ID AS id,
+                                base_cur.ID AS base_id,
+                                base_cur.Code AS base_code,
+                                base_cur.FullName AS base_name,
+                                base_cur.Sign AS base_sign,
+                                target_cur.ID AS target_id,
+                                target_cur.Code AS target_code,
+                                target_cur.FullName AS target_name,
+                                target_cur.Sign AS target_sign,
+                                er.rate AS rate
+                            FROM ExchangeRates AS er
+                            JOIN Currencies AS base_cur ON
+                                er.BaseCurrencyId = base_cur.ID
+                            JOIN Currencies AS target_cur ON
+                                er.TargetCurrencyId = target_cur.ID
+                            WHERE er.BaseCurrencyId=(SELECT ID FROM Currencies WHERE Code =?)
+                            AND er.TargetCurrencyId=(SELECT ID FROM Currencies WHERE Code =?)
+                            """;
             try {
                 Class.forName("org.sqlite.JDBC");
             } catch (ClassNotFoundException e) {
@@ -133,32 +164,35 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
             }
             Connection connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            statement.setInt(1, baseId);
-            statement.setInt(2, targetId);
+            statement.setString(1, baseCode);
+            statement.setString(2, targetCode);
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                int exchangeId = resultSet.getInt("ID");
-                exchangeRates.setId(exchangeId);
-                Optional<Currencies> baseOpt = new CurrenciesDao().getById(resultSet.getInt("BaseCurrencyId"));
-                if (baseOpt.isPresent()) {
-                    Currencies exchangeBaseId = baseOpt.get();
-                    exchangeRates.setBaseCurrency(exchangeBaseId);
-                }
-                Optional<Currencies> targetOpt = new CurrenciesDao().getById(resultSet.getInt("TargetCurrencyId"));
-                if (targetOpt.isPresent()) {
-                    Currencies exchangeTargetId = targetOpt.get();
-                    exchangeRates.setTargetCurrency(exchangeTargetId);
-                }
-                BigDecimal exchangeRate = resultSet.getBigDecimal("Rate");
-                exchangeRates.setRate(exchangeRate);
-            }
+            ExchangeRates exchangeRates = getExchangeRates(resultSet);
             connection.close();
             if (exchangeRates.getBaseCurrency() == null || exchangeRates.getTargetCurrency() == null) {
                 exchangeRates = null;
             }
             return Optional.ofNullable(exchangeRates);
-        } else {
-            return Optional.empty();
+    }
+
+    private ExchangeRates getExchangeRates(ResultSet resultSet) throws SQLException {
+        ExchangeRates exchangeRates = new ExchangeRates();
+        while (resultSet.next()) {
+            exchangeRates.setId(resultSet.getInt("id"));
+            Currencies baseCurrency = new Currencies();
+            baseCurrency.setId(resultSet.getInt("base_id"));
+            baseCurrency.setCode(resultSet.getString("base_code"));
+            baseCurrency.setFullName(resultSet.getString("base_name"));
+            baseCurrency.setSign(resultSet.getString("base_sign"));
+            exchangeRates.setBaseCurrency(baseCurrency);
+            Currencies targetCurrency = new Currencies();
+            targetCurrency.setId(resultSet.getInt("target_id"));
+            targetCurrency.setCode(resultSet.getString("target_code"));
+            targetCurrency.setFullName(resultSet.getString("target_name"));
+            targetCurrency.setSign(resultSet.getString("target_sign"));
+            exchangeRates.setTargetCurrency(targetCurrency);
+            exchangeRates.setRate(resultSet.getBigDecimal("Rate"));
         }
+        return exchangeRates;
     }
 }
