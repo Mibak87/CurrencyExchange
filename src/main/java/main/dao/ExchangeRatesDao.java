@@ -4,7 +4,6 @@ import main.entity.Currencies;
 import main.entity.ExchangeRates;
 import main.utils.Utils;
 
-import java.math.RoundingMode;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
