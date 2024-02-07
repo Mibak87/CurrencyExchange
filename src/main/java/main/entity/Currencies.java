@@ -6,18 +6,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"id", "fullName", "code", "sign"})
 public class Currencies {
-    private int id;
+    private long id;
     private String code;
     @JsonProperty("name")
     private String fullName;
     private String sign;
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

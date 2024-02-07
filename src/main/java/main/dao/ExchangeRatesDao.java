@@ -2,7 +2,7 @@ package main.dao;
 
 import main.entity.Currencies;
 import main.entity.ExchangeRates;
-import main.utils.Utils;
+import main.config.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao implements Dao<ExchangeRates> {
-    private final String path = Utils.getDataBasePath();
+    private final String path = Config.getDataBasePath();
 
     @Override
     public List<ExchangeRates> getAll() throws SQLException {
@@ -43,15 +43,15 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
             ExchangeRates exchangeRates = new ExchangeRates();
-            exchangeRates.setId(resultSet.getInt("id"));
+            exchangeRates.setId(resultSet.getLong("id"));
             Currencies baseCurrency = new Currencies();
-            baseCurrency.setId(resultSet.getInt("base_id"));
+            baseCurrency.setId(resultSet.getLong("base_id"));
             baseCurrency.setCode(resultSet.getString("base_code"));
             baseCurrency.setFullName(resultSet.getString("base_name"));
             baseCurrency.setSign(resultSet.getString("base_sign"));
             exchangeRates.setBaseCurrency(baseCurrency);
             Currencies targetCurrency = new Currencies();
-            targetCurrency.setId(resultSet.getInt("target_id"));
+            targetCurrency.setId(resultSet.getLong("target_id"));
             targetCurrency.setCode(resultSet.getString("target_code"));
             targetCurrency.setFullName(resultSet.getString("target_name"));
             targetCurrency.setSign(resultSet.getString("target_sign"));
@@ -73,8 +73,8 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         }
         Connection connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        statement.setInt(1, exchangeRates.getBaseCurrency().getId());
-        statement.setInt(2, exchangeRates.getTargetCurrency().getId());
+        statement.setLong(1, exchangeRates.getBaseCurrency().getId());
+        statement.setLong(2, exchangeRates.getTargetCurrency().getId());
         statement.setBigDecimal(3, exchangeRates.getRate());
         statement.executeUpdate();
         connection.close();
@@ -90,16 +90,16 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         }
         Connection connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        statement.setInt(1, exchangeRates.getBaseCurrency().getId());
-        statement.setInt(2, exchangeRates.getTargetCurrency().getId());
+        statement.setLong(1, exchangeRates.getBaseCurrency().getId());
+        statement.setLong(2, exchangeRates.getTargetCurrency().getId());
         statement.setBigDecimal(3, exchangeRates.getRate());
-        statement.setInt(4,exchangeRates.getId());
+        statement.setLong(4,exchangeRates.getId());
         statement.executeUpdate();
         connection.close();
     }
 
     @Override
-    public Optional<ExchangeRates> getById(int id) throws SQLException {
+    public Optional<ExchangeRates> getById(long id) throws SQLException {
         String sqlQuery = """
                             SELECT
                                 er.ID AS id,
@@ -126,7 +126,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRates> {
         }
         Connection connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        statement.setInt(1, id);
+        statement.setLong(1, id);
         ResultSet resultSet = statement.executeQuery();
         ExchangeRates exchangeRates = getExchangeRates(resultSet);
         connection.close();

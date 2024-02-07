@@ -6,17 +6,17 @@ import java.math.BigDecimal;
 
 @JsonPropertyOrder({"id", "baseCurrency", "targetCurrency", "rate"})
 public class ExchangeRates {
-    private int id;
+    private long id;
     private Currencies baseCurrency;
     private Currencies targetCurrency;
     private BigDecimal rate;
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

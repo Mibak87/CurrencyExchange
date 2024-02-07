@@ -11,10 +11,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class Converting {
+    private static final String CROSS_CURRENCY = "USD";
+
     private final String baseCode;
     private final String targetCode;
     private final String amountString;
-    private final String CROSS_CURRENCY = "USD";
+
 
     public Converting(String baseCode, String targetCode, String amountString) {
         this.baseCode = baseCode;
@@ -25,9 +27,7 @@ public class Converting {
     public Optional<ConvertedAmount> Convert() throws SQLException {
         BigDecimal amount = new BigDecimal(amountString);
         BigDecimal rate = getRate();
-        if (rate.signum() < 0) {
-            return Optional.empty();
-        } else {
+        if (rate.signum() >= 0) {
             BigDecimal convertedValue = amount.multiply(rate);
             ConvertedAmount convertedAmount = new ConvertedAmount();
             convertedAmount.setBaseCurrency(new CurrenciesDao().getByCode(baseCode).get());
@@ -37,22 +37,20 @@ public class Converting {
             convertedAmount.setConvertedAmount(convertedValue);
             return Optional.of(convertedAmount);
         }
+        return Optional.empty();
     }
 
     private BigDecimal getRate() throws SQLException {
         BigDecimal rate = getDirectOrReverseRate(baseCode,targetCode);
         if (rate.signum() < 0) {
             return getCrossConvertingRate();
-        } else {
-            return rate;
         }
+        return rate;
     }
 
     private BigDecimal getDirectOrReverseRate(String baseCode, String targetCode) throws SQLException {
         Optional<ExchangeRates> exchangeRatesOptional = new ExchangeRatesDao().getByCode(baseCode + targetCode);
-        if (exchangeRatesOptional.isPresent()) {
-            return exchangeRatesOptional.get().getRate();
-        } else {
+        if (!exchangeRatesOptional.isPresent()) {
             Optional<ExchangeRates> reverseRatesOptional = new ExchangeRatesDao().getByCode(targetCode + baseCode);
             if (reverseRatesOptional.isPresent()) {
                 return new BigDecimal(1).divide(reverseRatesOptional.get().getRate(),2,RoundingMode.DOWN);
@@ -60,15 +58,15 @@ public class Converting {
                 return new BigDecimal(-1);
             }
         }
+        return exchangeRatesOptional.get().getRate();
     }
 
     private BigDecimal getCrossConvertingRate() throws SQLException {
         BigDecimal firstRate = getDirectOrReverseRate(CROSS_CURRENCY,baseCode);
-        if (firstRate.signum() < 0) {
-            return new BigDecimal(-1);
-        } else {
+        if (firstRate.signum() >= 0) {
             BigDecimal secondRate = getDirectOrReverseRate(CROSS_CURRENCY,targetCode);
             return firstRate.divide(secondRate,2, RoundingMode.DOWN);
         }
+        return new BigDecimal(-1);
     }
 }

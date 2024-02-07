@@ -1,7 +1,7 @@
 package main.dao;
 
 import main.entity.Currencies;
-import main.utils.Utils;
+import main.config.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class CurrenciesDao implements Dao<Currencies> {
-    private final String path = Utils.getDataBasePath();
+    private final String path = Config.getDataBasePath();
     @Override
     public List<Currencies> getAll() throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies";
@@ -24,7 +24,7 @@ public class CurrenciesDao implements Dao<Currencies> {
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
             Currencies currencies = new Currencies();
-            int currenciesId = resultSet.getInt("ID");
+            long currenciesId = resultSet.getLong("ID");
             currencies.setId(currenciesId);
             String currenciesCode = resultSet.getString("Code");
             currencies.setCode(currenciesCode);
@@ -68,13 +68,13 @@ public class CurrenciesDao implements Dao<Currencies> {
         statement.setString(1, currencies.getCode());
         statement.setString(2, currencies.getFullName());
         statement.setString(3, currencies.getSign());
-        statement.setInt(4,currencies.getId());
+        statement.setLong(4,currencies.getId());
         statement.executeUpdate();
         connection.close();
     }
 
     @Override
-    public Optional<Currencies> getById(int id) throws SQLException {
+    public Optional<Currencies> getById(long id) throws SQLException {
         String sqlQuery = "SELECT * FROM Currencies WHERE ID=?";
         Currencies currencies = new Currencies();
         try {
@@ -84,10 +84,10 @@ public class CurrenciesDao implements Dao<Currencies> {
         }
         Connection connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
         PreparedStatement statement = connection.prepareStatement(sqlQuery);
-        statement.setInt(1, id);
+        statement.setLong(1, id);
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
-            int currenciesId = resultSet.getInt("ID");
+            long currenciesId = resultSet.getLong("ID");
             currencies.setId(currenciesId);
             String currenciesCode = resultSet.getString("Code");
             currencies.setCode(currenciesCode);
@@ -116,7 +116,7 @@ public class CurrenciesDao implements Dao<Currencies> {
         statement.setString(1, code);
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
-            int currenciesId = resultSet.getInt("ID");
+            long currenciesId = resultSet.getLong("ID");
             currencies.setId(currenciesId);
             String currenciesCode = resultSet.getString("Code");
             currencies.setCode(currenciesCode);

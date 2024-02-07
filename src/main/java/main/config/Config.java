@@ -1,19 +1,18 @@
-package main.utils;
+package main.config;
 
 import main.dao.CurrenciesDao;
 
 import java.io.File;
 import java.net.URL;
 
-public class Utils {
+public class Config {
     public static String getDataBasePath() {
         URL resource = CurrenciesDao.class.getClassLoader().getResource("CurrencyExchange.sqlite");
-        String path = null;
         try {
-            path = new File(resource.toURI()).getAbsolutePath();
+            return new File(resource.toURI()).getAbsolutePath();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.getMessage();
         }
-        return path;
+        return null;
     }
 }
